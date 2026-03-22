@@ -15,13 +15,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI as string, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(() => {
-    console.log('Database connection successful');
-}).catch(err => {
-    console.error('Database connection error:', err);
+let dbConnected = false;
+mongoose.connect(process.env.MONGODB_URI as string).then(() => {
+    console.log('✓ Database connection successful');
+    dbConnected = true;
+}).catch((err: Error) => {
+    console.warn('⚠ Database connection failed. Running in offline mode:', err.message);
+    console.warn('  To use database features, ensure MongoDB is running on', process.env.MONGODB_URI);
 });
 
 // User schema
@@ -55,12 +55,21 @@ app.post('/login', async (req, res) => {
     res.json({ token });
 });
 
+// Extend Express Request type to include user
+declare global {
+    namespace Express {
+        interface Request {
+            user?: any;
+        }
+    }
+}
+
 // Middleware for verifying tokens
 const authenticateToken = (req: express.Request, res: express.Response, next: express.NextFunction) => {
     const token = req.headers['authorization']?.split(' ')[1];
     if (!token) return res.sendStatus(401);
 
-    jwt.verify(token, process.env.JWT_SECRET as string, (err, user) => {
+    jwt.verify(token, process.env.JWT_SECRET as string, (err: jwt.VerifyErrors | null, user: any) => {
         if (err) return res.sendStatus(403);
         req.user = user;
         next();
@@ -68,7 +77,7 @@ const authenticateToken = (req: express.Request, res: express.Response, next: ex
 };
 
 // API Routes
-app.get('/api/users', authenticateToken, async (req, res) => {
+app.get('/api/users', authenticateToken, async (_req, res) => {
     const users = await User.find();
     res.json(users);
 });

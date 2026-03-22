@@ -1,5 +1,5 @@
-import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { ReactNode } from 'react';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -11,7 +11,7 @@ import Profile from './pages/Profile';
 // Simulated authentication status
 const isAuthenticated = false; // Change this based on your auth logic
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     return isAuthenticated ? children : <Navigate to="/login" />;
 };
 

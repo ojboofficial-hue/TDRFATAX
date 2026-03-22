@@ -25,12 +25,14 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('token', data.token);
+        localStorage.setItem('username', data.username);
         navigate('/dashboard');
       } else {
-        setError('Invalid username or password');
+        const errorData = await response.json();
+        setError(errorData.error || 'Login failed');
       }
     } catch (error) {
-      setError('Login failed. Please try again.');
+      setError('Login failed. Please check the connection.');
     } finally {
       setLoading(false);
     }

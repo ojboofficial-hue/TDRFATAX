@@ -31,10 +31,11 @@ const Register = () => {
       if (response.ok) {
         navigate('/login');
       } else {
-        setError('Registration failed. Try a different username.');
+        const errorData = await response.json();
+        setError(errorData.error || 'Registration failed');
       }
     } catch (error) {
-      setError('Registration failed. Please try again.');
+      setError('Registration failed. Please check the connection.');
     } finally {
       setLoading(false);
     }

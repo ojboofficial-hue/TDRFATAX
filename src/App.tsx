@@ -8,11 +8,13 @@ import CorporateTax from './pages/CorporateTax';
 import Payments from './pages/Payments';
 import Profile from './pages/Profile';
 
-// Simulated authentication status
-const isAuthenticated = false; // Change this based on your auth logic
+// Check if user is authenticated
+const isAuthenticated = (): boolean => {
+  return !!localStorage.getItem('token');
+};
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
-    return isAuthenticated ? children : <Navigate to="/login" />;
+    return isAuthenticated() ? children : <Navigate to="/login" />;
 };
 
 const App = () => {

@@ -15,10 +15,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // MongoDB connection
-let dbConnected = false;
 mongoose.connect(process.env.MONGODB_URI as string).then(() => {
     console.log('✓ Database connection successful');
-    dbConnected = true;
 }).catch((err: Error) => {
     console.warn('⚠ Database connection failed. Running in offline mode:', err.message);
     console.warn('  To use database features, ensure MongoDB is running on', process.env.MONGODB_URI);

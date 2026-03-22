@@ -1,11 +1,27 @@
 import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import AuthLayout from '../components/AuthLayout';
+import Input from '../components/Input';
+import Button from '../components/Button';
 
 const Register = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
     try {
       const response = await fetch('/api/register', {
         method: 'POST',
@@ -13,37 +29,63 @@ const Register = () => {
         body: JSON.stringify({ username, password }),
       });
       if (response.ok) {
-        alert('Registration successful');
-        window.location.href = '/login';
+        navigate('/login');
       } else {
-        alert('Registration failed');
+        setError('Registration failed. Try a different username.');
       }
     } catch (error) {
-      console.error('Registration error:', error);
+      setError('Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Register</h1>
-      <form onSubmit={handleRegister}>
-        <input
-          type="text"
-          placeholder="Username"
+    <AuthLayout title="Register">
+      <form onSubmit={handleRegister} className="space-y-4">
+        {error && (
+          <div className="px-4 py-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+        <Input
+          label="Username"
+          placeholder="Choose a username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          style={{ display: 'block', margin: '10px 0', padding: '8px' }}
+          required
+          disabled={loading}
         />
-        <input
+        <Input
+          label="Password"
           type="password"
-          placeholder="Password"
+          placeholder="Enter a password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={{ display: 'block', margin: '10px 0', padding: '8px' }}
+          required
+          disabled={loading}
         />
-        <button type="submit" style={{ padding: '8px 16px' }}>Register</button>
+        <Input
+          label="Confirm Password"
+          type="password"
+          placeholder="Confirm your password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+          disabled={loading}
+        />
+        <Button type="submit" fullWidth disabled={loading}>
+          {loading ? 'Registering...' : 'Register'}
+        </Button>
       </form>
-    </div>
+
+      <p className="text-center text-gray-600 mt-6">
+        Already have an account?{' '}
+        <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium">
+          Login here
+        </Link>
+      </p>
+    </AuthLayout>
   );
 };
 
